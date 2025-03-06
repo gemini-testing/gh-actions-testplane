@@ -1,0 +1,65 @@
+name: Testplane CI
+
+on:
+    push:
+        branches: [master]
+    pull_request:
+        branches: [master]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
+        with:
+            node-version: 20.x
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install npm deps
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run unit
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build GitHub action
+        run: npm run ci:build
+
+      - name: Run Testplane action
+        id: testplane
+        uses: ./
+        with:
+            cwd: testplane-project-example
+
+      - name: Deploy report
+        if: always() && steps.testplane.outputs.html-report-path
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: ${{ steps.testplane.outputs.html-report-path }}
+            destination_dir: ${{ steps.testplane.outputs.html-report-path }}
+            keep_files: true
+
+      - name: Comment PR with link to Testplane HTML report
+        if: always() && steps.testplane.outputs.html-report-path
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+            message: |
+                ### Testplane run finisned
+
+                Testplane HTML-report is available at https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ steps.testplane.outputs.html-report-path }}
+            comment-tag: testplane_html_report_link

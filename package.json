@@ -1,0 +1,55 @@
+{
+  "name": "gh-actions-testplane",
+  "version": "0.0.1",
+  "description": "Testplane github action",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build-base": "rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "build": "npm run build-base -- --file dist/dev.js",
+    "ci:build": "npm run build-base -- --file dist/index.js",
+    "test": "npm run lint && npm run unit",
+    "unit": "jest src",
+    "watch": "npm run unit -- --watch",
+    "lint": "eslint src && prettier src --check",
+    "reformat": "eslint src --fix && prettier src --write"
+  },
+  "keywords": [
+    "testplane",
+    "javascript",
+    "github",
+    "action"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/cache": "^4.0.0",
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^6.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@swc-node/register": "^1.10.9",
+    "@swc/core": "^1.10.7",
+    "@types/eslint__js": "^8.42.3",
+    "@types/eslint-config-prettier": "^6.11.3",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "html-reporter": "^10.13.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.4.2",
+    "rollup": "^4.30.1",
+    "testplane": "^8.25.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^7.18.0"
+  }
+}
