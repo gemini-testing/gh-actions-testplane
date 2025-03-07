@@ -55,7 +55,7 @@ jobs:
             keep_files: true
 
       - name: Comment PR with link to Testplane HTML report
-        if: always() && steps.testplane.outputs.html-report-path
+        if: always() && steps.testplane.outputs.html-report-path && github.event.pull_request
         uses: thollander/actions-comment-pull-request@v3
         with:
             message: |
