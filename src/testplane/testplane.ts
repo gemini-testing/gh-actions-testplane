@@ -61,7 +61,13 @@ export class Testplane {
         }
     }
 
-    public async installDependencies() {
+    public async installDependencies({ primaryCacheHit = false } = {}) {
+        if (primaryCacheHit) {
+            core.debug("Skip installing dependencies as it was fully restored from cache");
+
+            return;
+        }
+
         const testplaneConfig = await this.config();
 
         if (!testplaneConfig.isUsingLocalBrowsers()) {

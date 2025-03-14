@@ -15,11 +15,11 @@ export class TestplaneCache {
 
     constructor(private testplane: Testplane) {}
 
-    public async restoreCache(): Promise<void> {
+    public async restoreCache(): Promise<boolean> {
         await this.init();
 
         if (!this.needsBrowsersCache) {
-            return;
+            return false;
         }
 
         core.debug("Restore Testplane browsers cache");
@@ -29,6 +29,8 @@ export class TestplaneCache {
         const restoreKeys = [this.getCacheRestoreKey()];
 
         this.restoredCacheKey = (await cache.restoreCache(cachePaths, primaryKey, restoreKeys)) ?? null;
+
+        return this.restoredCacheKey === primaryKey;
     }
 
     public async saveCache(): Promise<void> {

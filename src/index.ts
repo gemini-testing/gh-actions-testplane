@@ -10,15 +10,11 @@ async function main() {
     const testplane = new Testplane(packageManager, core.getInput(INPUT.CONFIG_PATH));
     const testplaneCache = new TestplaneCache(testplane);
 
-    await core.group("restore cache", () => testplaneCache.restoreCache());
+    const primaryCacheHit = await core.group("restore cache", () => testplaneCache.restoreCache());
 
-    await core.group("install dependencies", () => testplane.installDependencies());
+    await core.group("install dependencies", () => testplane.installDependencies({ primaryCacheHit }));
 
-    core.startGroup("run testplane");
-
-    const exitCode = await testplane.run();
-
-    core.endGroup();
+    const exitCode = await core.group("run testplane", () => testplane.run());
 
     if (exitCode) {
         const postMortemData = await core.group("gather summary", () => testplane.getPostMortemData());

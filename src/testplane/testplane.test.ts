@@ -86,6 +86,18 @@ describe("Testplane", () => {
             expect(packageManagerRunnerMock.exec).not.toBeCalled();
         });
 
+        it("should skip installing dependencies on primary cache key hit", async () => {
+            const configMock = {
+                isUsingLocalBrowsers: jest.fn().mockReturnValue(true),
+            } as unknown as TestplaneConfig;
+            jest.spyOn(testplane, "config").mockResolvedValue(configMock);
+
+            await testplane.installDependencies({ primaryCacheHit: true });
+
+            expect(core.debug).toBeCalledWith("Skip installing dependencies as it was fully restored from cache");
+            expect(packageManagerRunnerMock.exec).not.toBeCalled();
+        });
+
         it("should install dependencies when using local browsers", async () => {
             const configMock = {
                 isUsingLocalBrowsers: jest.fn().mockReturnValue(true),
