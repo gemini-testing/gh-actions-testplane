@@ -38,4 +38,13 @@ jobs:
               run: npm run ci:build
 
             - name: Commit version
-              run: git add dist -f && git commit --amend --no-edit dist && git push --follow-tags
+              run: |
+                git add dist -f && \
+                git commit --amend --no-edit dist && \
+                TAG=`git describe --tags $(git rev-list --tags --max-count=1)` && \
+                MAJOR_BRANCH=`echo $TAG | cut -d '.' -f1` && \
+                git tag -d $TAG && \
+                git tag $TAG && \
+                git branch -f $MAJOR_BRANCH $TAG && \
+                git push --follow-tags && \
+                git push --follow-tags origin $MAJOR_BRANCH
