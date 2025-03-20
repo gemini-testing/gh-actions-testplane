@@ -5,7 +5,7 @@ import core from "@actions/core";
 import { existsSync, promises as fsPromises } from "node:fs";
 import { TestplaneConfig } from "./config";
 import { getHtmlReporterOverrideReportPathEnv } from "../env";
-import { groupTestsByFullTitle } from "../utils";
+import { groupTestsByFullTitle, getRootRelativePath } from "../utils";
 import type { PackageManagerRunner } from "../package-manager-runner";
 
 jest.mock("@actions/core");
@@ -15,8 +15,8 @@ jest.mock("node:fs", () => ({
 }));
 jest.mock("./config");
 jest.mock("../utils", () => ({
-    getRootRelativePath: (cwdRelativePath: string) => `cwd/${cwdRelativePath}`,
-    getCwdRelativePath: (rootRelativePath: string) => `../${rootRelativePath}`,
+    getRootRelativePath: jest.fn((cwdRelativePath: string) => `cwd/${cwdRelativePath}`),
+    getCwdRelativePath: jest.fn((rootRelativePath: string) => `../${rootRelativePath}`),
     groupTestsByFullTitle: jest.fn(),
 }));
 jest.mock("../env", () => ({
@@ -214,10 +214,11 @@ describe("Testplane", () => {
             jest.spyOn(testplane, "config").mockResolvedValue(configMock);
             jest.mocked(fsPromises.readFile).mockResolvedValue('[{"fullTitle": "test1"}]');
             jest.mocked(groupTestsByFullTitle).mockReturnValue({ test1: ["browser1"] });
+            jest.mocked(getRootRelativePath).mockReturnValue("cwd/some/path");
 
             const result = await testplane.getPostMortemData();
 
-            expect(fsPromises.readFile).toHaveBeenCalledWith("/some/path", { encoding: "utf8" });
+            expect(fsPromises.readFile).toHaveBeenCalledWith("cwd/some/path", { encoding: "utf8" });
             expect(core.setOutput).toHaveBeenCalledWith(OUTPUT.FAILED_TESTS_PATH, expect.any(String));
             expect(result).toEqual({
                 failedTestsCount: 1,
