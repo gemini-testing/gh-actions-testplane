@@ -119,15 +119,14 @@ export class Testplane {
     public async getPostMortemData(): Promise<PostMortemData> {
         const tesptlaneConfig = await this.config();
         const testplaneFailedTestsJsonPath = tesptlaneConfig.getLastFailedTestsJsonPath();
+        const testplaneFailedTestsJsonRootRelativePath = getRootRelativePath(testplaneFailedTestsJsonPath);
 
         try {
-            const testplaneFailedTestsJsonString = await fsPromises.readFile(testplaneFailedTestsJsonPath, {
+            const testplaneFailedTestsJsonString = await fsPromises.readFile(testplaneFailedTestsJsonRootRelativePath, {
                 encoding: "utf8",
             });
             const testplaneFailedTests: Test[] = JSON.parse(testplaneFailedTestsJsonString);
             const fullTitleGroupedTests = groupTestsByFullTitle(testplaneFailedTests);
-
-            const testplaneFailedTestsJsonRootRelativePath = getRootRelativePath(testplaneFailedTestsJsonPath);
 
             core.setOutput(OUTPUT.FAILED_TESTS_PATH, testplaneFailedTestsJsonRootRelativePath);
 
